@@ -16,7 +16,7 @@ class TaskItemStorage() : TaskStorage {
   private var autoIncrementId = 0
 
   init {
-      for (i in 0 until 20)  {
+      for (i in 0 until 10)  {
         val item = TaskItem("Title $i", "Body $i", completed = Random.nextBoolean())
         save(item)
       }

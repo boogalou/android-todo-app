@@ -1,35 +1,18 @@
 package su.demo.taskman.presentation
 
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import su.demo.taskman.R
 import su.demo.taskman.domain.entity.TaskItem
 import java.util.Date
 
-class TaskListAdapter : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
-
-
-  var taskItemList = listOf<TaskItem>()
-    set(value) {
-      val callback = TaskListDiff(taskItemList, value)
-      val diffResult = DiffUtil.calculateDiff(callback)
-      diffResult.dispatchUpdatesTo(this)
-      field = value
-    }
-
-  private var count = 0
-
+class TaskListAdapter : ListAdapter<TaskItem, TaskItemViewHolder>(TaskItemDiff()) {
 
   var onDoneClickHandler: ((TaskItem) -> Unit)? = null
   var onDetailClickHandler: ((TaskItem) -> Unit)? = null
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-    Log.w("CALLED onCreateViewHolder", "count: ${++count}")
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskItemViewHolder {
 
     val layout = when (viewType) {
       VIEW_TYPE_ENABLED -> R.layout.item_layout_enable
@@ -45,21 +28,19 @@ class TaskListAdapter : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
         false
       )
 
-    return TaskViewHolder(view)
+    return TaskItemViewHolder(view)
   }
 
-  override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-    val taskItem = taskItemList[position]
+  override fun onBindViewHolder(holder: TaskItemViewHolder, position: Int) {
+    val taskItem = getItem(position)
 
     holder.itemView.setOnClickListener {
       onDetailClickHandler?.invoke(taskItem)
     }
 
     holder.tvDone.setOnClickListener {
-      Log.d("OnClick", "Done Button $taskItem")
       onDoneClickHandler?.invoke(taskItem)
     }
-
 
     holder.tvTitle.text = taskItem.title
     holder.tvBody.text = taskItem.body
@@ -75,7 +56,7 @@ class TaskListAdapter : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
   }
 
   override fun getItemViewType(position: Int): Int {
-    val item = taskItemList[position]
+    val item = getItem(position)
 
     return if (item.completed) {
       VIEW_TYPE_ENABLED
@@ -83,18 +64,6 @@ class TaskListAdapter : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
       VIEW_TYPE_DISABLED
     }
   }
-
-  override fun getItemCount(): Int {
-    return taskItemList.size
-  }
-
-  class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val tvTitle: TextView = view.findViewById(R.id.tv_task__title)
-    val tvBody: TextView = view.findViewById(R.id.tv_task__body)
-    val tvDone: TextView = view.findViewById(R.id.tv_task__done)
-    val tvTime: TextView = view.findViewById(R.id.tv_task__time)
-  }
-
   companion object {
     const val VIEW_TYPE_ENABLED = 1
     const val VIEW_TYPE_DISABLED = 2
