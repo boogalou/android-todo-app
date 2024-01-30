@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import su.demo.taskman.R
 import su.demo.taskman.domain.entity.TaskItem
@@ -15,8 +16,10 @@ class TaskListAdapter : RecyclerView.Adapter<TaskListAdapter.TaskViewHolder>() {
 
   var taskItemList = listOf<TaskItem>()
     set(value) {
+      val callback = TaskListDiff(taskItemList, value)
+      val diffResult = DiffUtil.calculateDiff(callback)
+      diffResult.dispatchUpdatesTo(this)
       field = value
-      notifyDataSetChanged()
     }
 
   private var count = 0
